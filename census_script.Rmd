@@ -4,12 +4,23 @@ author: "David Kane"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, cache = TRUE}
 knitr::opts_chunk$set(echo = TRUE)
 
 library(lubridate)
 library(gganimate)
 library(tidyverse)
+library(gganimate)
+
+raw <- read_csv("censoc_dmf_v1.csv",
+                col_types = cols(HISTID = col_character(),
+                                 byear = col_double(),
+                                 bmonth = col_double(),
+                                 dyear = col_double(),
+                                 dmonth = col_double(),
+                                 death_age = col_double(),
+                                 weight = col_double())) %>%
+  filter(! bmonth == 0)
 ```
 
 This month, the [CenSoc Project](https://censoc.berkeley.edu/) at Berkeley released the first version of their individual-level data sets with information on almost everyone in the 1940 U.S. Census. The data is available to us. Today's project is to work with Big Data for real. (If you want to spend more time on machine learning, go through the examples in chapter 14.)
@@ -45,6 +56,27 @@ Create a plot like the [one on Piazza](https://piazza.com/class/k5y1jx0s5ibe1?ci
 Don't try to get this working on the whole data set at once. That takes forever. Create a small data set called `small` with about 10,000 rows randomly sampled from `x` first. Use `small` for everything. Then, when the plot looks good, use `x`. 
 
 
+```{r}
+
+x <- raw %>%
+  mutate(death_date = ymd(paste(dyear, dmonth, "01", sep = "-"))) %>%
+  select(death_date, death_age)
+
+
+small <- x %>%
+  sample_n(1000)
+
+z2 <- x %>%
+  group_by(death_age) %>%
+  summarize(deaths = n())
+
+sc2_p <- z2 %>%
+  ggplot(aes(x = death_age, y = deaths)) +
+  geom_col() +
+  transition_reveal(death_age)
+
+sc2_p
+```
 
 
 ## Scene 3
@@ -57,6 +89,10 @@ Hint: If you `group_by()` first, things go faster since you don't want to manipu
 
 Although you can go back and grab `dmonth`, you don't need to! You can work just with `x` and figure out the month by using the `month()` function.
 
+```{r}
+
+
+```
 
 
 ## Challenge Problem
